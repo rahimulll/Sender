@@ -1,0 +1,90 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 33
+    ndkVersion "24.0.8215888"
+
+    defaultConfig {
+        applicationId "com.akansh.fileserversuit"
+        minSdkVersion 21
+        targetSdkVersion 33
+        versionCode 30
+        versionName "2.3.7"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def apkName = "Sharex-v${defaultConfig.versionName}.apk"
+            outputFileName = apkName
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            ndk {
+                debugSymbolLevel 'SYMBOL_TABLE'
+            }
+        }
+    }
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/DEPENDENCIES', 'META-INF/LICENSE', 'META-INF/LICENSE.txt', 'META-INF/license.txt', 'META-INF/NOTICE', 'META-INF/NOTICE.txt', 'META-INF/notice.txt', 'META-INF/ASL2.0', 'META-INF/*.kotlin_module']
+        }
+    }
+
+    task fixLineEndings(type: Copy) {
+        from('src/main/assets') {
+            include '**/*.html', '**/*.css', '**/*.js'
+            filter {
+                String line = it.toString()
+                line.replaceAll("(?<!\\r)\\n", "\\r\\n")
+            }
+        }
+        into('build/intermediates/assets/release')
+    }
+
+    tasks.whenTaskAdded { task ->
+        if (task.name.startsWith('assemble')) {
+            task.dependsOn fixLineEndings
+        }
+    }
+
+
+    namespace 'com.akansh.fileserversuit'
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'org.nanohttpd:nanohttpd:2.3.1'
+    implementation 'org.nanohttpd:nanohttpd-apache-fileupload:2.3.1'
+    implementation 'javax.servlet:javax.servlet-api:4.0.1'
+    implementation 'net.lingala.zip4j:zip4j:2.11.5'
+    implementation 'com.github.TutorialsAndroid:FilePicker:v8.0.19'
+    implementation 'com.zhihu.android:matisse:0.5.3-beta3'
+    implementation 'com.github.clans:fab:1.6.4'
+    implementation 'com.github.bumptech.glide:glide:4.15.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.15.1'
+    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'com.dlazaro66.qrcodereaderview:qrcodereaderview:2.0.3'
+    implementation 'com.github.SumiMakito:AwesomeQRCode:1.2.0'
+
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}
+repositories {
+    mavenCentral()
+}
